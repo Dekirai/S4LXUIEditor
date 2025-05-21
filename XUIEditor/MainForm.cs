@@ -93,7 +93,7 @@ namespace XUIEditor
             loadFiles(Path.Combine(_baseFolder, "xui", "ui", "popup"), popNode);
             loadFiles(Path.Combine(_baseFolder, "gui", "new"), otherNode);
 
-            uiNode.Expand(); popNode.Expand(); otherNode.Expand();
+            //uiNode.Expand(); popNode.Expand(); otherNode.Expand();
             btnSave.Enabled = treeView1.Nodes
                                   .Cast<TreeNode>()
                                   .SelectMany(n => n.Nodes.Cast<TreeNode>())

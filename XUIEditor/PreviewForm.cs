@@ -288,7 +288,7 @@ namespace XUIEditor
                     hoverEl.Width, hoverEl.Height);
 
                 var name = hoverEl.Name;
-                using var font = new Font("Segoe UI", 9f);
+                using var font = new Font("Verdana", 9f);
                 var sz = e.Graphics.MeasureString(name, font);
                 float tx = hoverEl.X + (hoverEl.Width - sz.Width) / 2;
                 float ty = hoverEl.Y + hoverEl.Height + 4;
@@ -381,13 +381,13 @@ namespace XUIEditor
 
             if (!string.IsNullOrEmpty(el.Text))
             {
-                using var font = new Font("Tahoma", 9f, FontStyle.Bold);
+                using var font = new Font("Verdana", 9f);
                 var textSize = g.MeasureString(el.Text, font);
                 float tx = el.X + (el.Width - textSize.Width) / 2;
                 float ty = el.Y + (el.Height - textSize.Height) / 2;
 
                 var bgRect = new RectangleF(tx - 2, ty - 2, textSize.Width + 4, textSize.Height + 4);
-                g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
+                //g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
                 g.DrawString(el.Text, font, Brushes.Black, tx + 1, ty + 1);
                 g.DrawString(el.Text, font, Brushes.Orange, tx, ty);
             }
@@ -407,13 +407,13 @@ namespace XUIEditor
 
             if (!string.IsNullOrEmpty(el.Text))
             {
-                using var font = new Font("Tahoma", 9f, FontStyle.Bold);
+                using var font = new Font("Verdana", 9f);
                 var textSize = g.MeasureString(el.Text, font);
                 float tx = el.X + (el.Width - textSize.Width) / 2;
                 float ty = el.Y + (el.Height - textSize.Height) / 2;
 
                 var bgRect = new RectangleF(tx - 2, ty - 2, textSize.Width + 4, textSize.Height + 4);
-                g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
+                //g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
                 g.DrawString(el.Text, font, Brushes.Black, tx + 1, ty + 1);
                 g.DrawString(el.Text, font, Brushes.Orange, tx, ty);
             }
