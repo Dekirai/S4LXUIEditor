@@ -50,3 +50,9 @@
 
 - Use arrow keys for precise pixel adjustments
 - Uncheck elements to preview hidden UI flows
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
