@@ -1,20 +1,54 @@
-# XUIEditor
-XUI Editor for S4 League
+# XUIEditor 🎨
 
-> [!NOTE]
-> This program does not work with Valofe's S4 League
+> **XUIEditor** – an intuitive graphical editor for S4 League `.xui` UI files.
 
-# Usage
-1. Fully extract the game using a resource tool (Or just the resources folder)
-2. Start `XUIEditor.exe`
-3. Click `Load Folder` and select the `resources` directory
-4. All `.xui` files should be loaded now
-5. Click the `.xui` file you want to edit
-6. A new window opens, now you can easily edit it
+---
 
-- You can control the elements by using the arrow keys, drag and drop or manually edit the values
-- You can uncheck the checkboxes to hide a groupbox or a single element
-- Expect bugs, especially when enabling "Ignore "Show" property" or hiding groupboxes/elements
+## 🚀 Features
 
+- **Batch Load** entire `resources` folders
+- **Visual Editing**: drag, drop & arrow-key control of UI elements
+- **Property Panel**: toggle visibility, edit values on the fly
+- **Lightweight**: minimal dependencies, fast startup
 
-![image](https://i.imgur.com/0UK4va8.png)
+---
+
+## ⚙️ Requirements
+
+- Windows 7 or newer
+- [.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework) or later
+- S4 League resource files (unpacked `.xui` folder)
+
+---
+
+## 📦 Installation
+
+1. Download the latest [release ZIP](https://github.com/YourRepo/XUIEditor/releases).
+2. Extract to a folder of your choice.
+3. Ensure `.NET Framework 4.7.2` (or above) is installed.
+
+---
+
+## ▶️ Quick Start
+
+1. Run **`XUIEditor.exe`**
+2. Click **Load Folder** and select your `resources` directory
+3. Select any `.xui` file in the list to open the editor
+4. Edit properties via drag&drop, arrow keys, or direct value input
+5. Save your changes and reload in-game
+
+> **Note:** disabling **Show** flags or hiding nested groupboxes may cause display quirks. Use with caution.
+
+---
+
+## 📷 Screenshot
+
+![XUIEditor Screenshot](https://i.imgur.com/0UK4va8.png)
+
+---
+
+## 💡 Tips & Tricks
+
+- Use arrow keys for precise pixel adjustments
+- Uncheck elements to preview hidden UI flows
+- Batch-export multiple XUI files by selecting and saving consecutively
