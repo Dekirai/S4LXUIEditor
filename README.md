@@ -9,7 +9,6 @@
 - **Batch Load** entire `resources` folders
 - **Visual Editing**: drag, drop & arrow-key control of UI elements
 - **Property Panel**: toggle visibility, edit values on the fly
-- **Lightweight**: minimal dependencies, fast startup
 
 ---
 
@@ -17,7 +16,7 @@
 
 - Windows 7 or newer
 - [.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework) or later
-- S4 League resource files (unpacked `.xui` folder)
+- S4 League resource files
 
 ---
 
@@ -35,7 +34,7 @@
 2. Click **Load Folder** and select your `resources` directory
 3. Select any `.xui` file in the list to open the editor
 4. Edit properties via drag&drop, arrow keys, or direct value input
-5. Save your changes and reload in-game
+5. Save your changes and replace it with a resource tool
 
 > **Note:** disabling **Show** flags or hiding nested groupboxes may cause display quirks. Use with caution.
 
@@ -51,4 +50,3 @@
 
 - Use arrow keys for precise pixel adjustments
 - Uncheck elements to preview hidden UI flows
-- Batch-export multiple XUI files by selecting and saving consecutively
