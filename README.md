@@ -22,7 +22,7 @@
 
 ## 📦 Installation
 
-1. Download the latest [release ZIP](https://github.com/Dekirai/XUIEditor/releases).
+1. Download the latest [release](https://github.com/Dekirai/S4LXUIEditor/releases).
 2. Extract to a folder of your choice.
 3. Ensure `.NET Framework 4.7.2` (or above) is installed.
 
