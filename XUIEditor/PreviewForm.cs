@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.Globalization;
 
 namespace XUIEditor
 {
@@ -372,26 +376,65 @@ namespace XUIEditor
             previewPanel.Invalidate();
         }
 
+        private void DrawTextStyled(Graphics g, XuiElement el)
+        {
+            var style = TextStyler.Parse(el.Text);
+
+            var rect = new RectangleF(el.X, el.Y, el.Width, el.Height);
+
+            var sf = new StringFormat
+            {
+                Alignment = style.Alignment,
+                LineAlignment = StringAlignment.Center,
+            };
+            if (style.WordWrap)
+                sf.FormatFlags &= ~StringFormatFlags.NoWrap;
+
+            using (var sb = new SolidBrush(style.ShadowColor))
+            {
+                var shadowRect = rect;
+                shadowRect.Offset(1, 1);
+                g.DrawString(style.Text, style.Font, sb, shadowRect, sf);
+            }
+
+            using (var fb = new SolidBrush(style.ForeColor))
+            {
+                g.DrawString(style.Text, style.Font, fb, rect, sf);
+            }
+        }
+
+
+
         private void DrawCacheTree(Graphics g, XuiElement el)
         {
             if (_hidden.Contains(el)) return;
             if (!IgnoreShow && !el.Show) return;
+
             if (el.ElementImage != null)
                 g.DrawImage(el.ElementImage, el.X, el.Y, el.Width, el.Height);
 
             if (!string.IsNullOrEmpty(el.Text))
             {
-                using var font = new Font("Verdana", 9f);
-                var textSize = g.MeasureString(el.Text, font);
-                float tx = el.X + (el.Width - textSize.Width) / 2;
-                float ty = el.Y + (el.Height - textSize.Height) / 2;
+                if (el.Text.StartsWith("{") && el.Text.Contains("}"))
+                {
+                    DrawTextStyled(g, el);
+                }
+                else
+                {
+                    using var font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                    var textSize = g.MeasureString(el.Text, font);
+                    float tx = el.X + (el.Width - textSize.Width) / 2;
+                    float ty = el.Y + (el.Height - textSize.Height) / 2;
 
-                var bgRect = new RectangleF(tx - 2, ty - 2, textSize.Width + 4, textSize.Height + 4);
-                //g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
-                g.DrawString(el.Text, font, Brushes.Black, tx + 1, ty + 1);
-                g.DrawString(el.Text, font, Brushes.Orange, tx, ty);
+                    using var shadowBrush = new SolidBrush(Color.Black);
+                    g.DrawString(el.Text, font, shadowBrush, tx + 1, ty + 1);
+
+                    using var mainBrush = new SolidBrush(Color.Orange);
+                    g.DrawString(el.Text, font, mainBrush, tx, ty);
+                }
             }
 
+            // 4) recurse
             for (int i = el.Children.Count - 1; i >= 0; i--)
                 DrawCacheTree(g, el.Children[i]);
         }
@@ -407,20 +450,27 @@ namespace XUIEditor
 
             if (!string.IsNullOrEmpty(el.Text))
             {
-                using var font = new Font("Verdana", 9f);
-                var textSize = g.MeasureString(el.Text, font);
-                float tx = el.X + (el.Width - textSize.Width) / 2;
-                float ty = el.Y + (el.Height - textSize.Height) / 2;
+                if (el.Text.StartsWith("{") && el.Text.Contains("}"))
+                    DrawTextStyled(g, el);
+                else
+                {
+                    using var font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                    var textSize = g.MeasureString(el.Text, font);
+                    float tx = el.X + (el.Width - textSize.Width) / 2;
+                    float ty = el.Y + (el.Height - textSize.Height) / 2;
 
-                var bgRect = new RectangleF(tx - 2, ty - 2, textSize.Width + 4, textSize.Height + 4);
-                //g.FillRectangle(new SolidBrush(Color.FromArgb(160, 0, 0, 0)), bgRect);
-                g.DrawString(el.Text, font, Brushes.Black, tx + 1, ty + 1);
-                g.DrawString(el.Text, font, Brushes.Orange, tx, ty);
+                    using var shadowBrush = new SolidBrush(Color.Black);
+                    g.DrawString(el.Text, font, shadowBrush, tx + 1, ty + 1);
+                    using var mainBrush = new SolidBrush(Color.Orange);
+                    g.DrawString(el.Text, font, mainBrush, tx, ty);
+                }
             }
 
             for (int i = el.Children.Count - 1; i >= 0; i--)
                 DrawCacheTreeExcept(g, el.Children[i], skip);
         }
+
+
 
         private bool IsDescendantOf(XuiElement el, XuiElement ancestor)
         {
@@ -477,5 +527,129 @@ namespace XUIEditor
                 e.Handled = true;
             }
         }
+
+        public class TextStyle
+        {
+            public string Text { get; set; }
+            public Color ForeColor { get; set; } = Color.White;
+            public Color BackColor { get; set; } = Color.Transparent;
+            public Color ShadowColor { get; set; } = Color.Black;
+            public StringAlignment Alignment { get; set; } = StringAlignment.Near;
+            public Font Font { get; set; } = new Font("Segoe UI", 9f);
+        }
+
+        public class TextStyler
+        {
+            private static readonly PrivateFontCollection _customFonts = new PrivateFontCollection();
+
+            private static readonly Regex _fontRx = new Regex(@"\{F-(?<name>[A-Za-z0-9]+)_(?<size>\d+)\}", RegexOptions.Compiled);
+            private static readonly Regex _alignRx = new Regex(@"\{A-(?<mode>L|C|R)\}", RegexOptions.Compiled);
+            private static readonly Regex _shadowRx = new Regex(@"\{CS-(?<r>\d+),(?<g>\d+),(?<b>\d+),(?<a>\d+)\}", RegexOptions.Compiled);
+            private static readonly Regex _foreRx = new Regex(@"\{CB-(?<r>\d+),(?<g>\d+),(?<b>\d+),(?<a>\d+)\}", RegexOptions.Compiled);
+            private static readonly Regex _wrapRx = new Regex(@"\{W\}", RegexOptions.Compiled);
+
+            public Font Font { get; private set; }
+            public StringAlignment Alignment { get; private set; } = StringAlignment.Center;
+            public Color ShadowColor { get; private set; } = Color.Black;
+            public Color ForeColor { get; private set; } = Color.White;
+            public bool WordWrap { get; private set; }
+            public string Text { get; private set; }
+
+            public static TextStyler Parse(string raw)
+            {
+                var style = new TextStyler();
+
+                style.Font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
+
+                var mF = _fontRx.Match(raw);
+                if (mF.Success)
+                {
+                    var name = mF.Groups["name"].Value;
+                    var size = float.Parse(mF.Groups["size"].Value, CultureInfo.InvariantCulture);
+
+                    // attempt to load custom TTF from exe folder
+                    var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var file = Path.Combine(exeDir, name + ".ttf");
+                    if (File.Exists(file))
+                    {
+                        if (!_customFonts.Families.Any(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                            _customFonts.AddFontFile(file);
+
+                        var fam = _customFonts.Families
+                                   .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                                   ?? _customFonts.Families.First();
+
+                        style.Font = new Font(fam, size, FontStyle.Regular, GraphicsUnit.Point);
+                    }
+                    else
+                    {
+                        // fallback to system font
+                        try
+                        {
+                            style.Font = new Font(name, size, FontStyle.Regular, GraphicsUnit.Point);
+                        }
+                        catch { /* ignore, keep default */ }
+                    }
+
+                    raw = raw.Remove(mF.Index, mF.Length);
+                }
+
+                var mA = _alignRx.Match(raw);
+                if (mA.Success)
+                {
+                    switch (mA.Groups["mode"].Value)
+                    {
+                        case "L": style.Alignment = StringAlignment.Center; break;
+                        case "C": style.Alignment = StringAlignment.Center; break;
+                        case "R": style.Alignment = StringAlignment.Center; break;
+                    }
+                    raw = raw.Remove(mA.Index, mA.Length);
+                }
+
+                var mS = _shadowRx.Match(raw);
+                if (mS.Success && TryParseColor(mS, out var sc))
+                {
+                    style.ShadowColor = sc;
+                    raw = raw.Remove(mS.Index, mS.Length);
+                }
+
+                var mC = _foreRx.Match(raw);
+                if (mC.Success && TryParseColor(mC, out var fc))
+                {
+                    style.ForeColor = fc;
+                    raw = raw.Remove(mC.Index, mC.Length);
+                }
+
+                if (_wrapRx.IsMatch(raw))
+                {
+                    style.WordWrap = true;
+                    raw = _wrapRx.Replace(raw, "");
+                }
+
+                style.Text = raw;
+
+                return style;
+            }
+
+            private static bool TryParseColor(Match m, out Color c)
+            {
+                c = Color.Empty;
+                if (m.Groups["r"].Success &&
+                    m.Groups["g"].Success &&
+                    m.Groups["b"].Success &&
+                    m.Groups["a"].Success &&
+                    byte.TryParse(m.Groups["r"].Value, out var r) &&
+                    byte.TryParse(m.Groups["g"].Value, out var g) &&
+                    byte.TryParse(m.Groups["b"].Value, out var b) &&
+                    byte.TryParse(m.Groups["a"].Value, out var a))
+                {
+                    c = Color.FromArgb(a, r, g, b);
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
     }
 }
